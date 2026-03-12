@@ -1,0 +1,98 @@
+/* main.css — основные стили NewsPortal */
+
+/* ── Переменные ─────────────────────────────────────────────── */
+:root {
+    --primary: #ffc107;
+    --dark: #212529;
+    --card-radius: 12px;
+}
+
+/* ── Общие стили ────────────────────────────────────────────── */
+body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background-color: #f8f9fa;
+    color: #333;
+}
+
+/* ── Навигация (статичная, не плавает) ──────────────────────── */
+.navbar {
+    padding: 10px 0;
+    /* position: static — по умолчанию, навбар не залипает */
+}
+.navbar-brand {
+    font-size: 1.4rem;
+    letter-spacing: -0.5px;
+}
+
+/* ── Карточки новостей ──────────────────────────────────────── */
+.news-card {
+    border-radius: var(--card-radius);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    overflow: hidden;
+}
+.news-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12) !important;
+}
+.news-card-img {
+    height: 180px;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+.news-card:hover .news-card-img {
+    transform: scale(1.03);
+}
+
+/* ── Hero секция ────────────────────────────────────────────── */
+.hero-section {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+}
+.featured-card,
+.featured-card-sm {
+    border-radius: var(--card-radius);
+    overflow: hidden;
+    position: relative;
+}
+.bg-gradient-dark {
+    background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.3) 60%, transparent 100%);
+    border-radius: 0 0 var(--card-radius) var(--card-radius);
+    padding: 20px;
+}
+
+/* ── Текст новости ──────────────────────────────────────────── */
+.news-content {
+    line-height: 1.9;
+    font-size: 1.05rem;
+    color: #2c2c2c;
+}
+.news-content p {
+    margin-bottom: 1.2rem;
+}
+
+/* ── Утилиты ────────────────────────────────────────────────── */
+.w-fit {
+    width: fit-content;
+}
+
+/* ── Hover для ссылок в footer ──────────────────────────────── */
+.hover-link:hover {
+    color: var(--primary) !important;
+    transition: color 0.2s;
+}
+
+/* ── Поиск в навбаре ────────────────────────────────────────── */
+.navbar .input-group {
+    width: 220px;
+}
+
+/* ── Таблица в дашборде ─────────────────────────────────────── */
+.table td, .table th {
+    vertical-align: middle;
+    font-size: 0.9rem;
+}
+
+@media (max-width: 768px) {
+    .hero-section { padding: 1.5rem 0; }
+    .navbar .input-group { width: 150px; }
+    .news-card-img { height: 160px; }
+}

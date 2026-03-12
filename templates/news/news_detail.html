@@ -1,0 +1,226 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row g-4">
+
+        <div class="col-lg-8">
+
+            <nav aria-label="breadcrumb" class="mb-3">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'news:list' %}" class="text-decoration-none">Главная</a>
+                    </li>
+                    {% if news.category %}
+                    <li class="breadcrumb-item">
+                        <a href="{{ news.category.get_absolute_url }}"
+                           class="text-decoration-none">{{ news.category.name }}</a>
+                    </li>
+                    {% endif %}
+                    <li class="breadcrumb-item active">{{ news.title|truncatechars:40 }}</li>
+                </ol>
+            </nav>
+
+            <!-- Карточка новости -->
+            <article class="card border-0 shadow-sm mb-4">
+
+                <!-- Изображение из URL -->
+                {% if news.image_url %}
+                <img src="{{ news.image_url }}"
+                     class="card-img-top"
+                     alt="{{ news.title }}"
+                     style="max-height: 450px; object-fit: cover;"
+                     onerror="this.style.display='none';">
+                {% endif %}
+
+                <div class="card-body p-4">
+                    <!-- Категория -->
+                    {% if news.category %}
+                    <a href="{{ news.category.get_absolute_url }}"
+                       class="badge bg-warning text-dark text-decoration-none mb-2 fs-6">
+                        <i class="bi {{ news.category.icon }} me-1"></i>
+                        {{ news.category.name }}
+                    </a>
+                    {% endif %}
+
+                    <!-- Заголовок -->
+                    <h1 class="card-title h2 fw-bold mt-2">{{ news.title }}</h1>
+
+                    <!-- Метаданные -->
+                    <div class="d-flex flex-wrap gap-3 text-muted small mb-3 pb-3 border-bottom">
+                        <span>
+                            <i class="bi bi-person-circle me-1 text-primary"></i>
+                            {{ news.author.get_full_name|default:news.author.username }}
+                        </span>
+                        <span>
+                            <i class="bi bi-calendar3 me-1 text-success"></i>
+                            {{ news.created_at|date:"d F Y, H:i" }}
+                        </span>
+                        <!-- Просмотры из MongoDB -->
+                        <span class="text-primary fw-semibold">
+                            <i class="bi bi-eye me-1"></i>
+                            {{ views_count }} просмотров
+                            <small class="text-muted fw-normal">(MongoDB)</small>
+                        </span>
+                        <!-- Комментарии из PostgreSQL -->
+                        <span>
+                            <i class="bi bi-chat-dots me-1 text-warning"></i>
+                            {{ comments.count }} комментариев
+                            <small class="text-muted">(PostgreSQL)</small>
+                        </span>
+                    </div>
+
+                    <!-- Полный текст новости -->
+                    <div class="news-content">
+                        {{ news.content|linebreaks }}
+                    </div>
+
+                    <!-- Кнопки управления (только для staff) -->
+                    {% if user.is_staff %}
+                    <div class="d-flex gap-2 mt-4 pt-3 border-top">
+                        <a href="{% url 'news:edit' news.slug %}"
+                           class="btn btn-outline-warning btn-sm">
+                            <i class="bi bi-pencil me-1"></i>Редактировать
+                        </a>
+                        <a href="{% url 'news:delete' news.slug %}"
+                           class="btn btn-outline-danger btn-sm">
+                            <i class="bi bi-trash me-1"></i>Удалить
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </article>
+
+            <!-- Информационный блок -->
+            <div class="card border-0 bg-light mb-4">
+                <div class="card-body">
+                    <h6 class="fw-bold mb-2">
+                        <i class="bi bi-diagram-3 text-info me-1"></i>
+                        Как работают две базы данных на этой странице:
+                    </h6>
+                    <div class="row g-2">
+                        <div class="col-md-6">
+                            <div class="p-2 bg-primary bg-opacity-10 rounded border border-primary border-opacity-25">
+                                <div class="d-flex align-items-center mb-1">
+                                    <span class="badge bg-primary me-2">PostgreSQL</span>
+                                    <small class="fw-semibold">Реляционная БД</small>
+                                </div>
+                                <ul class="list-unstyled small mb-0 text-muted">
+                                    <li><i class="bi bi-check2 text-success me-1"></i>Заголовок и текст</li>
+                                    <li><i class="bi bi-check2 text-success me-1"></i>Автор и категория</li>
+                                    <li><i class="bi bi-check2 text-success me-1"></i>Комментарии</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="p-2 bg-success bg-opacity-10 rounded border border-success border-opacity-25">
+                                <div class="d-flex align-items-center mb-1">
+                                    <span class="badge bg-success me-2">MongoDB</span>
+                                    <small class="fw-semibold">NoSQL БД</small>
+                                </div>
+                                <ul class="list-unstyled small mb-0 text-muted">
+                                    <li><i class="bi bi-check2 text-success me-1"></i>Просмотры ({{ views_count }})</li>
+                                    <li><i class="bi bi-check2 text-success me-1"></i>История просмотров</li>
+                                    <li><i class="bi bi-check2 text-success me-1"></i>Популярные новости</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {% if related_news %}
+            <div class="mb-4">
+                <h5 class="fw-bold mb-3">
+                    <i class="bi bi-collection me-1 text-warning"></i>
+                    Похожие новости
+                </h5>
+                <div class="row g-2">
+                    {% for related in related_news %}
+                    <div class="col-md-4">
+                        <div class="card border-0 shadow-sm h-100">
+                            {% if related.image_url %}
+                            <img src="{{ related.image_url }}"
+                                 class="card-img-top"
+                                 style="height: 120px; object-fit: cover;"
+                                 alt="{{ related.title }}"
+                                 onerror="this.style.display='none';">
+                            {% endif %}
+                            <div class="card-body p-2">
+                                <p class="card-text small fw-semibold">
+                                    <a href="{{ related.get_absolute_url }}"
+                                       class="text-decoration-none text-dark">
+                                        {{ related.title|truncatechars:60 }}
+                                    </a>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="card border-0 shadow-sm" id="comments">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold mb-4">
+                        <i class="bi bi-chat-dots me-1 text-warning"></i>
+                        Комментарии ({{ comments.count }})
+                    </h5>
+
+                    {% for comment in comments %}
+                    <div class="d-flex gap-3 mb-3 pb-3 {% if not forloop.last %}border-bottom{% endif %}">
+                        <div class="flex-shrink-0">
+                            <div class="bg-warning rounded-circle d-flex align-items-center
+                                        justify-content-center text-dark fw-bold"
+                                 style="width: 42px; height: 42px; font-size: 1.1rem;">
+                                {{ comment.author.username|first|upper }}
+                            </div>
+                        </div>
+                        <div class="flex-grow-1">
+                            <div class="d-flex justify-content-between">
+                                <strong>{{ comment.author.username }}</strong>
+                                <small class="text-muted">{{ comment.created_at|date:"d.m.Y H:i" }}</small>
+                            </div>
+                            <p class="mb-0 mt-1 text-muted">{{ comment.text }}</p>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="text-center text-muted py-3">
+                        <i class="bi bi-chat-square me-1"></i>
+                        Комментариев пока нет. Будьте первым!
+                    </div>
+                    {% endfor %}
+
+                    <div class="mt-4 pt-3 border-top">
+                        {% if user.is_authenticated %}
+                        <h6 class="fw-bold mb-3">Добавить комментарий:</h6>
+                        <form method="post" action="{{ request.path }}#comments">
+                            {% csrf_token %}
+                            {{ comment_form.text }}
+                            <button type="submit" class="btn btn-warning mt-2">
+                                <i class="bi bi-send me-1"></i>Отправить
+                            </button>
+                        </form>
+                        {% else %}
+                        <div class="alert alert-light border">
+                            <i class="bi bi-info-circle me-1"></i>
+                            Чтобы оставить комментарий,
+                            <a href="{% url 'accounts:login' %}?next={{ request.path }}#comments">
+                                войдите в аккаунт
+                            </a>
+                            или
+                            <a href="{% url 'accounts:register' %}">зарегистрируйтесь</a>.
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <div class="col-lg-4">
+            {% include "partials/sidebar.html" %}
+        </div>
+    </div>
+</div>
+{% endblock %}

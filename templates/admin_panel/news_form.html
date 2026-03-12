@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-newspaper me-1 text-warning"></i>
+                        {{ title }}
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        {% for field in form %}
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold small">
+                                {{ field.label }}
+                                {% if field.field.required %}
+                                <span class="text-danger">*</span>
+                                {% endif %}
+                            </label>
+                            {{ field }}
+                            {% if field.errors %}
+                            <div class="text-danger small mt-1">{{ field.errors }}</div>
+                            {% endif %}
+                            {% if field.help_text %}
+                            <div class="form-text">{{ field.help_text }}</div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+
+                        <div class="d-flex gap-2 mt-4">
+                            <button type="submit" class="btn btn-warning fw-semibold">
+                                <i class="bi bi-save me-1"></i>{{ action }}
+                            </button>
+                            <a href="{% url 'news:admin_dashboard' %}"
+                               class="btn btn-outline-secondary">
+                                Отмена
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

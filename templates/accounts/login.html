@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-5 col-lg-4">
+            <div class="card border-0 shadow">
+                <div class="card-body p-4">
+                    <div class="text-center mb-4">
+                        <div class="bg-dark rounded-circle d-inline-flex align-items-center
+                                    justify-content-center mb-3" style="width: 60px; height: 60px;">
+                            <i class="bi bi-person-circle fs-4 text-warning"></i>
+                        </div>
+                        <h2 class="h4 fw-bold">Вход в аккаунт</h2>
+                    </div>
+
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold small">Логин</label>
+                            {{ form.username }}
+                            {% if form.username.errors %}
+                            <div class="invalid-feedback d-block">{{ form.username.errors }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold small">Пароль</label>
+                            {{ form.password }}
+                            {% if form.password.errors %}
+                            <div class="invalid-feedback d-block">{{ form.password.errors }}</div>
+                            {% endif %}
+                        </div>
+                        <button type="submit" class="btn btn-dark w-100 fw-semibold">
+                            <i class="bi bi-box-arrow-in-right me-1"></i>Войти
+                        </button>
+                    </form>
+
+                    <div class="text-center mt-3">
+                        <small class="text-muted">
+                            Нет аккаунта?
+                            <a href="{% url 'accounts:register' %}" class="text-warning fw-semibold">
+                                Зарегистрироваться
+                            </a>
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,195 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<!-- ══════════════════════════════════════════ HERO секция -->
+{% if featured_news and not request.GET.q %}
+<section class="hero-section bg-dark py-5 mb-4">
+    <div class="container">
+        <div class="row g-3">
+            <!-- Главная новость (большая карточка) -->
+            {% if featured_news.0 %}
+            <div class="col-lg-8">
+                <div class="card border-0 h-100 featured-card">
+                    {% if featured_news.0.image_url %}
+                    <img src="{{ featured_news.0.image_url }}" class="card-img" alt="{{ featured_news.0.title }}"
+                         style="height: 380px; object-fit: cover; opacity: 0.85;">
+                    {% else %}
+                    <div class="card-img bg-secondary d-flex align-items-center justify-content-center"
+                         style="height: 380px;">
+                        <i class="bi bi-newspaper text-muted" style="font-size: 5rem;"></i>
+                    </div>
+                    {% endif %}
+                    <div class="card-img-overlay d-flex flex-column justify-content-end bg-gradient-dark">
+                        {% if featured_news.0.category %}
+                        <span class="badge bg-warning text-dark mb-2 w-fit">
+                            {{ featured_news.0.category.name }}
+                        </span>
+                        {% endif %}
+                        <h2 class="card-title text-white">
+                            <a href="{{ featured_news.0.get_absolute_url }}"
+                               class="text-white text-decoration-none stretched-link">
+                                {{ featured_news.0.title }}
+                            </a>
+                        </h2>
+                        <p class="card-text text-white-50 small">
+                            <i class="bi bi-person me-1"></i>{{ featured_news.0.author.get_full_name|default:featured_news.0.author.username }}
+                            <span class="ms-2"><i class="bi bi-calendar3 me-1"></i>{{ featured_news.0.created_at|date:"d M Y" }}</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Две дополнительные главные новости -->
+            <div class="col-lg-4 d-flex flex-column gap-3">
+                {% for featured in featured_news|slice:"1:3" %}
+                <div class="card border-0 flex-grow-1 featured-card-sm">
+                    {% if featured.image_url %}
+                    <img src="{{ featured.image_url }}" class="card-img" alt="{{ featured.title }}"
+                         style="height: 175px; object-fit: cover; opacity: 0.85;">
+                    {% else %}
+                    <div class="card-img bg-secondary d-flex align-items-center justify-content-center"
+                         style="height: 175px;">
+                        <i class="bi bi-newspaper text-muted" style="font-size: 2.5rem;"></i>
+                    </div>
+                    {% endif %}
+                    <div class="card-img-overlay d-flex flex-column justify-content-end bg-gradient-dark">
+                        <h6 class="card-title text-white mb-0">
+                            <a href="{{ featured.get_absolute_url }}"
+                               class="text-white text-decoration-none stretched-link">
+                                {{ featured.title|truncatechars:70 }}
+                            </a>
+                        </h6>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- ══════════════════════════════════════════ ОСНОВНОЙ КОНТЕНТ -->
+<div class="container py-4">
+
+    {% if category %}
+    <div class="d-flex align-items-center mb-4">
+        <i class="bi {{ category.icon }} text-warning me-2 fs-4"></i>
+        <div>
+            <h1 class="h3 mb-0">{{ category.name }}</h1>
+            {% if category.description %}
+            <p class="text-muted mb-0 small">{{ category.description }}</p>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="row g-4">
+        <!-- ── Список новостей ────────────────────────────────── -->
+        <div class="col-lg-9">
+            {% if page_obj %}
+            <div class="row g-3">
+                {% for news_item in page_obj %}
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100 shadow-sm border-0 news-card">
+
+                        <!-- Изображение -->
+                        <a href="{{ news_item.get_absolute_url }}">
+                            {% if news_item.image_url %}
+                            <img src="{{ news_item.image_url }}"
+                                 class="card-img-top news-card-img"
+                                 alt="{{ news_item.title }}"
+                                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                            <div class="card-img-top news-card-img bg-light d-none align-items-center justify-content-center">
+                                <i class="bi bi-image text-secondary" style="font-size: 3rem;"></i>
+                            </div>
+                            {% else %}
+                            <div class="card-img-top news-card-img bg-light d-flex align-items-center justify-content-center">
+                                <i class="bi bi-newspaper text-secondary" style="font-size: 3rem;"></i>
+                            </div>
+                            {% endif %}
+                        </a>
+
+                        <div class="card-body d-flex flex-column">
+                            <!-- Категория -->
+                            {% if news_item.category %}
+                            <a href="{{ news_item.category.get_absolute_url }}"
+                               class="badge bg-warning text-dark text-decoration-none mb-2 w-fit">
+                                {{ news_item.category.name }}
+                            </a>
+                            {% endif %}
+
+                            <!-- Заголовок -->
+                            <h5 class="card-title">
+                                <a href="{{ news_item.get_absolute_url }}"
+                                   class="text-decoration-none text-dark">
+                                    {{ news_item.title|truncatechars:70 }}
+                                </a>
+                            </h5>
+
+                            <!-- Мета-информация -->
+                            <div class="d-flex justify-content-between align-items-center mt-auto pt-2 border-top">
+                                <small class="text-muted">
+                                    <i class="bi bi-calendar3 me-1"></i>
+                                    {{ news_item.created_at|date:"d.m.Y" }}
+                                </small>
+                                <div class="d-flex gap-2">
+                                    <small class="text-muted">
+                                        <i class="bi bi-eye text-primary me-1"></i>
+                                        {{ news_item.views_count|default:0 }}
+                                    </small>
+                                    <small class="text-muted">
+                                        <i class="bi bi-chat text-success me-1"></i>
+                                        {{ news_item.published_comments_count }}
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Пагинация -->
+            {% if page_obj.has_other_pages %}
+            <nav class="mt-4">
+                <ul class="pagination justify-content-center">
+                    {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}">
+                            <i class="bi bi-chevron-left"></i>
+                        </a>
+                    </li>
+                    {% endif %}
+                    {% for num in page_obj.paginator.page_range %}
+                    <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                        <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                    </li>
+                    {% endfor %}
+                    {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}">
+                            <i class="bi bi-chevron-right"></i>
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+
+            {% else %}
+            <div class="text-center py-5">
+                <i class="bi bi-inbox text-muted" style="font-size: 4rem;"></i>
+                <h4 class="mt-3 text-muted">Новостей пока нет</h4>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- ── Боковая панель ─────────────────────────────────── -->
+        <div class="col-lg-3">
+            {% include "partials/sidebar.html" %}
+        </div>
+    </div>
+</div>
+{% endblock %}
